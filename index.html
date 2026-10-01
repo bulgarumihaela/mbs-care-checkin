@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MBS CARE | Check-in</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --brand: #B091A6;
+      --brand-dark: #98798F;
+      --background: #f7f7f5;
+      --text: #222;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 650px;
+      margin: auto;
+      padding: 24px 18px 60px;
+    }
+
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      margin: 4px 0 24px;
+    }
+
+    .logo {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      display: block;
+    }
+
+    h1 {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 22px;
+    }
+
+    p {
+      line-height: 1.6;
+    }
+
+    .intro {
+      color: #666;
+      margin-bottom: 28px;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 7px;
+      background: #e5e5e5;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: var(--brand);
+      transition: width .3s;
+    }
+
+    .question {
+      background: white;
+      padding: 22px;
+      border-radius: 16px;
+      margin-bottom: 18px;
+    }
+
+    .question-number {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .question-text {
+      font-size: 17px;
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .scale {
+      display: flex;
+      justify-content: space-between;
+      gap: 7px;
+    }
+
+    .scale button {
+      flex: 1;
+      height: 48px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      background: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .scale button.selected {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+    }
+
+    .labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+    }
+
+    .main-button {
+      width: 100%;
+      padding: 16px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 12px;
+      background: var(--brand);
+      color: white;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .main-button:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    #result {
+      display: none;
+    }
+
+    .result-card {
+      background: white;
+      border-radius: 18px;
+      padding: 24px;
+      margin-top: 20px;
+    }
+
+    .score {
+      margin: 14px 0;
+    }
+
+    .score-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .bar-bg {
+      height: 8px;
+      background: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      background: var(--brand);
+      border-radius: 10px;
+    }
+
+    .direction {
+      margin-top: 30px;
+      padding: 24px;
+      border-radius: 18px;
+      background: #efefec;
+    }
+
+    .direction h2 {
+      margin-top: 0;
+    }
+
+    .direction-link {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      background: var(--brand);
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+
+    .direction-link + .direction-link {
+      margin-top: 10px;
+    }
+
+    .disclaimer {
+      margin-top: 25px;
+      font-size: 13px;
+      color: #777;
+      line-height: 1.5;
+    }
+
+    .restart {
+      background: transparent;
+      color: var(--brand-dark);
+      border: 1px solid var(--brand);
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div id="quiz">
+
+    <div class="logo-container">
+      <img src="logo.PNG" alt="MBS CARE" class="logo">
+    </div>
+
+    <h1>MBS CARE | Check-in</h1>
+
+    <p class="intro">
+      Oprește-te câteva minute și observă cum ești acum.
+      <br><br>
+      Gândește-te la <strong>ultimele 7 zile</strong>.
+      Pentru fiecare afirmație, alege cât de bine descrie experiența ta.
+      <br><br>
+      1 = Deloc &nbsp; · &nbsp; 5 = Foarte mult
+    </p>
+
+    <div class="progress-container">
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div id="questions"></div>
+
+    <button
+      id="resultButton"
+      class="main-button"
+      disabled
+      onclick="calculateResult()"
+    >
+      Vezi rezultatul
+    </button>
+
+  </div>
+
+  <div id="result">
+
+    <div class="logo-container">
+      <img src="logo.PNG" alt="MBS CARE" class="logo">
+    </div>
+
+    <h1>Check-in-ul tău</h1>
+
+    <p class="intro">
+      Aceasta este fotografia modului în care te percepi în acest moment.
+    </p>
+
+    <div class="result-card">
+
+      <h2>Ce ai observat</h2>
+
+      <div id="scores"></div>
+
+    </div>
+
+    <div class="direction" id="direction"></div>
+
+    <p class="disclaimer">
+      Acest check-in este un instrument de autoobservare și orientare.
+      Nu reprezintă un diagnostic și nu înlocuiește evaluarea unui
+      profesionist medical sau psihologic atunci când aceasta este necesară.
+    </p>
+
+    <button
+      class="main-button restart"
+      onclick="restartQuiz()"
+    >
+      Repetă Check-in-ul
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const questions = [
+
+  // CORP
+  {
+    text: "După somn, simt în continuare oboseală.",
+    category: "corp"
+  },
+  {
+    text: "Alimentația mea este neregulată sau nu răspunde nevoilor corpului meu.",
+    category: "corp"
+  },
+  {
+    text: "Pe parcursul zilei, observ că nu beau suficientă apă.",
+    category: "corp"
+  },
+  {
+    text: "Mișcarea lipsește sau este insuficientă în rutina mea.",
+    category: "corp"
+  },
+  {
+    text: "Corpul meu îmi transmite că are nevoie de mai multă îngrijire.",
+    category: "corp"
+  },
+
+  // EMOTII
+  {
+    text: "Îmi este greu să identific clar ceea ce simt.",
+    category: "emotii"
+  },
+  {
+    text: "Uneori, emoțiile devin greu de gestionat.",
+    category: "emotii"
+  },
+  {
+    text: "Am tendința să evit, să ignor sau să țin în mine ceea ce simt.",
+    category: "emotii"
+  },
+  {
+    text: "Anumite stări emoționale persistă și îmi influențează ziua.",
+    category: "emotii"
+  },
+  {
+    text: "Simt nevoia de mai mult spațiu pentru a-mi observa și înțelege emoțiile.",
+    category: "emotii"
+  },
+
+  // MINTE
+  {
+    text: "Mintea mea este frecvent agitată sau suprasolicitată.",
+    category: "minte"
+  },
+  {
+    text: "Îmi este greu să îmi mențin atenția acolo unde aleg.",
+    category: "minte"
+  },
+  {
+    text: "Revin frecvent la aceleași gânduri.",
+    category: "minte"
+  },
+  {
+    text: "Uneori reacționez automat și abia apoi observ ce s-a întâmplat.",
+    category: "minte"
+  },
+  {
+    text: "Există o diferență între ceea ce îmi propun și ceea ce ajung efectiv să fac.",
+    category: "minte"
+  },
+
+  // SUFLET
+  {
+    text: "Simt o deconectare față de mine.",
+    category: "suflet"
+  },
+  {
+    text: "Îmi este greu să identific ceea ce am nevoie cu adevărat.",
+    category: "suflet"
+  },
+  {
+    text: "Alegerile mele sunt influențate mai mult de ceea ce „trebuie” decât de ceea ce este important pentru mine.",
+    category: "suflet"
+  },
+  {
+    text: "Îmi lipsește timpul de liniște și conectare cu mine.",
+    category: "suflet"
+  },
+  {
+    text: "Simt nevoia să mă ascult și să mă întorc mai mult către mine.",
+    category: "suflet"
+  }
+
+];
+
+const answers = new Array(questions.length).fill(null);
+
+const categoryInfo = {
+
+  corp: {
+    name: "CORP",
+    emoji: "🧘🏼‍♀️",
+    link: "https://t.me/+ZU9CAIUisgA2OGE0",
+    title: "Corpul tău cere atenție.",
+    text:
+      "Răspunsurile tale arată că, în acest moment, zona CORP iese cel mai mult în evidență. Începe prin a observa baza: somnul, alimentația, hidratarea și mișcarea. Nu este nevoie să le schimbi pe toate deodată."
+  },
+
+  emotii: {
+    name: "EMOȚII",
+    emoji: "✨",
+    link: "https://t.me/+PSvYZ20X7D04OGY0",
+    title: "Emoțiile tale cer atenție.",
+    text:
+      "Răspunsurile tale arată că, în acest moment, zona EMOȚII iese cel mai mult în evidență. Aici poți începe prin a observa mai clar ce simți, ce eviți și ce stări persistă, înainte de a încerca să le schimbi."
+  },
+
+  minte: {
+    name: "MINTE",
+    emoji: "🧠",
+    link: "https://t.me/+lcppdchz1n8yN2Y0",
+    title: "Mintea ta cere atenție.",
+    text:
+      "Răspunsurile tale arată că, în acest moment, zona MINTE iese cel mai mult în evidență. Aici poți începe să observi gândurile repetitive, atenția, agitația mentală și reacțiile care apar pe pilot automat."
+  },
+
+  suflet: {
+    name: "SUFLET",
+    emoji: "🤍",
+    link: "https://t.me/+ZKNpcKAQyBdlYTc0",
+    title: "Relația cu tine cere atenție.",
+    text:
+      "Răspunsurile tale arată că, în acest moment, zona SUFLET iese cel mai mult în evidență. Aici poți crea spațiu pentru a observa ce ai nevoie, ce este important pentru tine și cât loc îți oferi pentru a te asculta."
+  }
+
+};
+
+
+function renderQuestions() {
+
+  const container = document.getElementById("questions");
+
+  questions.forEach((q, index) => {
+
+    const box = document.createElement("div");
+    box.className = "question";
+
+    box.innerHTML = `
+      <div class="question-number">
+        ${index + 1} / ${questions.length}
+      </div>
+
+      <div class="question-text">
+        ${q.text}
+      </div>
+
+      <div class="scale">
+
+        ${[1,2,3,4,5].map(value => `
+          <button
+            type="button"
+            data-question="${index}"
+            data-value="${value}"
+          >
+            ${value}
+          </button>
+        `).join("")}
+
+      </div>
+
+      <div class="labels">
+        <span>Deloc</span>
+        <span>Foarte mult</span>
+      </div>
+    `;
+
+    container.appendChild(box);
+
+  });
+
+
+  document.querySelectorAll(".scale button").forEach(button => {
+
+    button.addEventListener("click", function() {
+
+      const question = Number(this.dataset.question);
+      const value = Number(this.dataset.value);
+
+      answers[question] = value;
+
+      document
+        .querySelectorAll(`[data-question="${question}"]`)
+        .forEach(btn => btn.classList.remove("selected"));
+
+      this.classList.add("selected");
+
+      updateProgress();
+
+    });
+
+  });
+
+}
+
+
+function updateProgress() {
+
+  const answered = answers.filter(value => value !== null).length;
+
+  const percent = (answered / questions.length) * 100;
+
+  document.getElementById("progress").style.width =
+    percent + "%";
+
+  document.getElementById("resultButton").disabled =
+    answered !== questions.length;
+
+}
+
+
+function calculateResult() {
+
+  const scores = {
+    corp: 0,
+    emotii: 0,
+    minte: 0,
+    suflet: 0
+  };
+
+  questions.forEach((question, index) => {
+    scores[question.category] += answers[index];
+  });
+
+
+  const sorted = Object.entries(scores)
+    .sort((a, b) => b[1] - a[1]);
+
+  const highestScore = sorted[0][1];
+
+  const leadingCategories = sorted
+    .filter(item => highestScore - item[1] <= 2)
+    .map(item => item[0]);
+
+
+  showResult(scores, leadingCategories);
+
+}
+
+
+function showResult(scores, leadingCategories) {
+
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("result").style.display = "block";
+
+  const scoresContainer = document.getElementById("scores");
+
+  scoresContainer.innerHTML = "";
+
+
+  Object.keys(scores).forEach(category => {
+
+    const info = categoryInfo[category];
+
+    const score = scores[category];
+
+    const percent = ((score - 5) / 20) * 100;
+
+    scoresContainer.innerHTML += `
+
+      <div class="score">
+
+        <div class="score-line">
+          <span>
+            ${info.emoji} ${info.name}
+          </span>
+
+          <strong>
+            ${score}/25
+          </strong>
+        </div>
+
+        <div class="bar-bg">
+          <div
+            class="bar"
+            style="width:${percent}%"
+          ></div>
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+
+  const direction = document.getElementById("direction");
+
+
+  if (leadingCategories.length === 1) {
+
+    const category = leadingCategories[0];
+
+    const info = categoryInfo[category];
+
+    direction.innerHTML = `
+
+      <h2>
+        ${info.emoji} ${info.title}
+      </h2>
+
+      <p>
+        ${info.text}
+      </p>
+
+      <a
+        href="${info.link}"
+        target="_blank"
+        class="direction-link"
+      >
+        Intră în MBS CARE | ${info.name} →
+      </a>
+
+    `;
+
+  }
+
+  else {
+
+    const names = leadingCategories
+      .map(category =>
+        `${categoryInfo[category].emoji} ${categoryInfo[category].name}`
+      )
+      .join(" & ");
+
+    direction.innerHTML = `
+
+      <h2>
+        Două sau mai multe zone ies în evidență
+      </h2>
+
+      <p>
+        În acest moment, răspunsurile tale indică:
+      </p>
+
+      <h3>
+        ${names}
+      </h3>
+
+      <p>
+        Scorurile sunt apropiate.
+        Observă care dintre aceste zone are
+        cel mai mare impact asupra vieții tale acum
+        și începe de acolo.
+      </p>
+
+      ${leadingCategories.map(category => {
+
+        const info = categoryInfo[category];
+
+        return `
+
+          <a
+            href="${info.link}"
+            target="_blank"
+            class="direction-link"
+          >
+            ${info.emoji} MBS CARE | ${info.name}
+          </a>
+
+        `;
+
+      }).join("")}
+
+    `;
+
+  }
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+function restartQuiz() {
+
+  for (let i = 0; i < answers.length; i++) {
+    answers[i] = null;
+  }
+
+  document
+    .querySelectorAll(".scale button")
+    .forEach(button =>
+      button.classList.remove("selected")
+    );
+
+  document.getElementById("progress").style.width = "0%";
+
+  document.getElementById("resultButton").disabled = true;
+
+  document.getElementById("result").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+renderQuestions();
+
+</script>
+
+</body>
+</html>
